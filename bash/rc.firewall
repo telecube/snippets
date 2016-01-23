@@ -100,6 +100,7 @@ ADDITIONAL_NAT_INTERFACES=""
 IGNORE_INTERFACES=""
 LOGGING="no"
 REQUIRE_EXTERNAL_CONFIG="no"
+INC_MODPROBE_CHECK="yes"
 
 ############################################
 # -- Advanced Firewall Behavior Options -- #
@@ -852,43 +853,46 @@ fi
 echo -n "."
 
 # Determine if this is a modular kernel, if so modprobe the required modules.
+if [ "$INC_MODPROBE_CHECK" == "yes" ]; then
 
-#if !(( `which modprobe 2>&1 | grep -c "which: no modprobe in"` )) && [ -a "/proc/modules" ]; then
-#  if (( `lsmod | grep -c "ipchains"` )); then
-#    rmmod ipchains > /dev/null 2>&1
-#  fi
-#  REQUIRED_MODULES="ip_tables ip_conntrack ipt_state iptable_filter ip_conntrack_irc ip_conntrack_ftp"
-#  if [ "$RFC_1122_COMPLIANT" == "yes" ]; then
-#    REQUIRED_MODULES="$REQUIRED_MODULES ipt_REJECT"
-#  fi
-#  if [ "$LOGGING" == "yes" ]; then
-#    REQUIRED_MODULES="$REQUIRED_MODULES ipt_LOG ipt_limit"
-#  fi
-#  if [ "$IS_ROUTER" == "yes" ]; then
-#    if [ -n "$STATIC_NAT_INTERFACES" ] || [ -n "$DYNAMIC_NAT_INTERFACES" ] || \
-#       [ -n "$PORT_FORWARDS" ] || [ -n "$STATIC_INSIDE_OUTSIDE" ]; then
-#      REQUIRED_MODULES="$REQUIRED_MODULES iptable_nat ip_nat_irc ip_nat_ftp"
-#      if [ -n "$DYNAMIC_NAT_INTERFACES" ] || \
-#	 ( [ -n "$DYNAMIC_INTERFACES" ] && ( [ -n "$PORT_FORWARDS" ] || [ -n "$STATIC_INSIDE_OUTSIDE" ] ) ); then
-#	REQUIRED_MODULES="$REQUIRED_MODULES ipt_MASQUERADE"
-#      fi
-#    fi
-#    if [ -n "$PORT_FORWARDS" ] || [ "$TTL_STEALTH_ROUTER" == "yes" ]; then
-#      REQUIRED_MODULES="$REQUIRED_MODULES iptable_mangle"
-#    fi
-#    if [ -n "$PORT_FORWARDS" ]; then
-#      REQUIRED_MODULES="$REQUIRED_MODULES ipt_mark ipt_MARK"
-#    fi
-#    if [ "$TTL_STEALTH_ROUTER" == "yes" ]; then
-#      REQUIRED_MODULES="$REQUIRED_MODULES ipt_TTL"
-#    fi
-#  fi
-#  for MODULE in $REQUIRED_MODULES; do
-#    if (( `modprobe -l | grep -c "$MODULE"` )); then
-#      modprobe $MODULE > /dev/null 2>&1
-#    fi
-#  done
-#fi
+  if !(( `which modprobe 2>&1 | grep -c "which: no modprobe in"` )) && [ -a "/proc/modules" ]; then
+    if (( `lsmod | grep -c "ipchains"` )); then
+      rmmod ipchains > /dev/null 2>&1
+    fi
+    REQUIRED_MODULES="ip_tables ip_conntrack ipt_state iptable_filter ip_conntrack_irc ip_conntrack_ftp"
+    if [ "$RFC_1122_COMPLIANT" == "yes" ]; then
+      REQUIRED_MODULES="$REQUIRED_MODULES ipt_REJECT"
+    fi
+    if [ "$LOGGING" == "yes" ]; then
+      REQUIRED_MODULES="$REQUIRED_MODULES ipt_LOG ipt_limit"
+    fi
+    if [ "$IS_ROUTER" == "yes" ]; then
+      if [ -n "$STATIC_NAT_INTERFACES" ] || [ -n "$DYNAMIC_NAT_INTERFACES" ] || \
+         [ -n "$PORT_FORWARDS" ] || [ -n "$STATIC_INSIDE_OUTSIDE" ]; then
+        REQUIRED_MODULES="$REQUIRED_MODULES iptable_nat ip_nat_irc ip_nat_ftp"
+        if [ -n "$DYNAMIC_NAT_INTERFACES" ] || \
+  	 ( [ -n "$DYNAMIC_INTERFACES" ] && ( [ -n "$PORT_FORWARDS" ] || [ -n "$STATIC_INSIDE_OUTSIDE" ] ) ); then
+  	REQUIRED_MODULES="$REQUIRED_MODULES ipt_MASQUERADE"
+        fi
+      fi
+      if [ -n "$PORT_FORWARDS" ] || [ "$TTL_STEALTH_ROUTER" == "yes" ]; then
+        REQUIRED_MODULES="$REQUIRED_MODULES iptable_mangle"
+      fi
+      if [ -n "$PORT_FORWARDS" ]; then
+        REQUIRED_MODULES="$REQUIRED_MODULES ipt_mark ipt_MARK"
+      fi
+      if [ "$TTL_STEALTH_ROUTER" == "yes" ]; then
+        REQUIRED_MODULES="$REQUIRED_MODULES ipt_TTL"
+      fi
+    fi
+    for MODULE in $REQUIRED_MODULES; do
+      if (( `modprobe -l | grep -c "$MODULE"` )); then
+        modprobe $MODULE > /dev/null 2>&1
+      fi
+    done
+  fi
+
+fi
 
 # Obtain list of internal networks with subnet masks corresponding to internal interfaces.
 

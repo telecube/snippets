@@ -52,7 +52,7 @@ PERMIT="80"
 PERMIT="$PERMIT 22"
 
 # allowed networks
-#PERMIT="$PERMIT "
+PERMIT="$PERMIT 192.168.0.0/24"
 
 # voip ports
 #PERMIT="$PERMIT 5060/udp 8000-30000/udp"

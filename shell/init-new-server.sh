@@ -27,7 +27,7 @@ fi
 
 # install common tools
 apt-get update
-apt-get install -y ntpdate htop iftop wget nano iptables
+apt-get install -y ntpdate htop iftop nano iptables
 
 # get rc.firewall
 if [ -f /etc/rc.firewall ];
@@ -39,7 +39,7 @@ else
 	chmod 0755 /etc/rc.firewall
 
 	# remove the port 22 from the firewall and restart install
-	sed -i 's/PERMIT="$PERMIT 22"/PERMIT="$PERMIT $1"/' /etc/rc.firewall
+	sed -i "s/PERMIT=\"\$PERMIT 22\"/PERMIT=\"\$PERMIT $1\"/" /etc/rc.firewall
 
 	/etc/rc.firewall
 
@@ -54,7 +54,7 @@ then
     echo "Port $1 already configured"
 else
     # ssh port not found
-	sed -i '/Port 22/a Port $1\n' /etc/ssh/sshd_config
+	sed -i "/Port 22/a Port $1\n" /etc/ssh/sshd_config
 
 	echo "Added port $1 to sshd_config ..."
 fi
